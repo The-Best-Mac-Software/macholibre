@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>macholibre by aaronst</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">macholibre</h1>
+      <h2 class="project-tagline">Mach-O &amp; Universal Binary Parser</h2>
+      <a href="https://github.com/aaronst/macholibre" class="btn">View on GitHub</a>
+      <a href="https://github.com/aaronst/macholibre/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/aaronst/macholibre/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="macholibre" class="anchor" href="#macholibre" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>macholibre</h1>
+
+<h2>
+<a id="description" class="anchor" href="#description" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Description</h2>
+
+<p>macholibre is a Mach-O and Universal binary parser.  It extracts information 
+such as architectures, load commands, dynamic libraries, symbols, function 
+imports, and tons more.  Then it packs all of that information into JSON for 
+ease of analysis and integration.</p>
+
+<h2>
+<a id="dependencies" class="anchor" href="#dependencies" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Dependencies</h2>
+
+<p>I tried to make this tool with as little external dependencies as possible, and
+I think I did pretty well on that front.  The only module I import is for parsing
+CMS signatures.  I've configured the setup.py to automatically install it with
+the module, but you can also install it seperately with pip or manually from github.</p>
+
+<ul>
+<li>
+<a href="https://www.python.org/download/releases/2.7/">Python 2.7</a>
+
+<ul>
+<li>
+<a href="https://github.com/vbwagner/ctypescrypto">ctypescrypto</a>
+
+<ul>
+<li>ctypescrypto depends on openssl under the hood, on linux it should be
+installed by default but on other OS's you might have to do this
+yourself.  Anyways, make sure the version you install has CMS capabilities.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<h2>
+<a id="how-to" class="anchor" href="#how-to" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How To</h2>
+
+<h3>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation</h3>
+
+<p>I recommend using pip to install macholibre.</p>
+
+<div class="highlight highlight-source-shell"><pre>pip install git+https://github.com/aaronst/macholibre.git</pre></div>
+
+<h4>
+<a id="os-x-users-important-notes" class="anchor" href="#os-x-users-important-notes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>OS X USERS: IMPORTANT NOTES</h4>
+
+<p>If you run into any errors while using macholibre on OS X, try the following
+before creating a ticket.</p>
+
+<p>Make sure your version of OpenSSL is up to date with <code>openssl version</code>.
+macholibre has been confirmed working with <code>OpenSSL 1.0.2h  3 May 2016</code>.</p>
+
+<pre><code>brew update
+brew install openssl
+brew link --force openssl
+</code></pre>
+
+<p>pip may install an old version of the ctypescrypto dependency that crashes on OS X.
+In order to fix this you'll need to install the current version from github.</p>
+
+<div class="highlight highlight-source-shell"><pre>pip uninstall ctypescrypto
+pip install git+https://github.com/vbwagner/ctypescrypto.git</pre></div>
+
+<h3>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h3>
+
+<h4>
+<a id="as-a-module" class="anchor" href="#as-a-module" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>As a Module</h4>
+
+<div class="highlight highlight-source-python"><pre><span class="pl-k">from</span> macholibre <span class="pl-k">import</span> macholibre
+
+<span class="pl-c"># mach-o file path</span>
+path <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">'</span>/home/aaron/my_macho<span class="pl-pds">'</span></span>
+
+<span class="pl-c"># return json</span>
+json_data <span class="pl-k">=</span> macholibre.parse(path)
+
+<span class="pl-c"># write json to file</span>
+out_file <span class="pl-k">=</span> <span class="pl-c1">open</span>(<span class="pl-s"><span class="pl-pds">'</span>/home/aaron/macholibre_output.json<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>w<span class="pl-pds">'</span></span>)
+macholibre.parse(path, <span class="pl-v">f</span><span class="pl-k">=</span>out_file)</pre></div>
+
+<h4>
+<a id="as-a-script" class="anchor" href="#as-a-script" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>As a Script</h4>
+
+<div class="highlight highlight-source-python"><pre>python macholibre.py (<span class="pl-k">-</span>r <span class="pl-k">&lt;</span>directory<span class="pl-k">|</span>glob<span class="pl-k">&gt;</span> <span class="pl-k">|</span> <span class="pl-k">&lt;</span><span class="pl-v">file</span><span class="pl-k">&gt;</span>) [options]</pre></div>
+
+<h5>
+<a id="options" class="anchor" href="#options" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Options</h5>
+
+<ul>
+<li>-h: Help</li>
+<li>-r: Parse directory of glob</li>
+<li>-o: Specify output file</li>
+</ul>
+
+<h5>
+<a id="note" class="anchor" href="#note" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Note</h5>
+
+<p>For single files, make sure you put the filename first, before any options.<br>
+Also, globs need to be in quotes and paths need to be absolute.</p>
+
+<h5>
+<a id="examples" class="anchor" href="#examples" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Examples</h5>
+
+<h6>
+<a id="single-file" class="anchor" href="#single-file" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Single File</h6>
+
+<div class="highlight highlight-source-python"><pre>python macholibre.py otool <span class="pl-k">-</span>o otool.json</pre></div>
+
+<h6>
+<a id="glob" class="anchor" href="#glob" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Glob</h6>
+
+<div class="highlight highlight-source-python"><pre>python macholibre.py <span class="pl-k">-</span>r <span class="pl-s"><span class="pl-pds">"</span>machos/*<span class="pl-pds">"</span></span> <span class="pl-k">-</span>o machos.json</pre></div>
+
+<h2>
+<a id="output-format" class="anchor" href="#output-format" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Output Format</h2>
+
+<p>macholibre formats all of its output into a JSON blob.  Check out
+<a href="app_store.json">app_store.json</a> as an example using the App Store app.</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/aaronst/macholibre">macholibre</a> is maintained by <a href="https://github.com/aaronst">aaronst</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
